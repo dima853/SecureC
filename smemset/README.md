@@ -1,5 +1,8 @@
 # 🚀 Secure Memset Library (smemset)
 
+### ⚠️ **The project is under implementation, this is a test version!**
+---
+
 **Guaranteed memory overwrite that the compiler won't dare optimize away!**
 
 ## 📖 About the Project
