@@ -94,7 +94,7 @@ void *smemset(void *dstpp, int c, size_t len)
             len -= 1;
         }
 
-        __asm__ __volatile__("" ::: "memory");
+        __asm__ __volatile__("mfence" ::: "memory");
 
         xlen = len / (OPSIZ * 8);
         while (xlen > 0)
