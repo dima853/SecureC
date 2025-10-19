@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-// ==================== Main function ====================
 void *smemset(void *dstpp, int c, size_t len);
 
 #ifdef REPLACE_STANDARD_MEMSET
@@ -16,68 +15,45 @@ void *smemset(void *dstpp, int c, size_t len);
 #define memset smemset
 #endif
 
-// ==================== Contexts for secure memset ====================
+// ==================== Typed Limits ====================
 typedef enum {
-    SMEMSET_CONTEXT_GENERIC, // General case
-    SMEMSET_CONTEXT_ETHERNET, // Ethernet frames
-    SMEMSET_CONTEXT_IP, // IP packets  
-    SMEMSET_CONTEXT_UDP, // UDP datagrams
-    SMEMSET_CONTEXT_TCP, // TCP segments
-    SMEMSET_CONTEXT_SNMP,        // SNMP PDU
-    SMEMSET_CONTEXT_USER // User limit
+    SMEMSET_LIMIT_ETH_FRAME = 1518U,
+    SMEMSET_LIMIT_ETH_PAYLOAD = 1500U,  
+    SMEMSET_LIMIT_IP_PACKET = 65535U,
+    SMEMSET_LIMIT_SNMP_PDU = 1472U,
+    SMEMSET_LIMIT_UDP_MAX = 65507U,
+    SMEMSET_LIMIT_TCP_MSS = 1460U
+} SmemsetLimit;
+
+// ==================== Context Types ====================
+typedef enum {
+    SMEMSET_CONTEXT_GENERIC,
+    SMEMSET_CONTEXT_ETHERNET,
+    SMEMSET_CONTEXT_IP,
+    SMEMSET_CONTEXT_UDP,
+    SMEMSET_CONTEXT_TCP, 
+    SMEMSET_CONTEXT_SNMP
 } SmemsetContext;
 
-// ==================== Typed limits ====================
-typedef struct {
-    size_t max_frame_size;
-    size_t max_payload_size;
-} EthernetLimits;
-
-typedef struct {
-    size_t max_packet_size; 
-    size_t max_header_size;
-    size_t default_mtu;
-} IpLimits;
-
-// ==================== External constants (declaration) ====================
-extern const EthernetLimits ETH_LIMITS;
-extern const IpLimits IP_LIMITS;
-
-// ==================== Advanced secure features ====================
-
-/**
-* @brief Secure memset with context check
- * @param dstpp Buffer pointer
- * @param c Value to fill in
- * @param len Length to fill in
- * @param context Usage context
- * @return Pointer to dstpp or NULL in case of error
-*/
+// ==================== Safe Functions ====================
 void *smemset_ex(void *dstpp, int c, size_t len, SmemsetContext context);
-
-/**
-* @brief Secure memset with user limit
- * @param dstpp Buffer pointer
- * @param c Value to fill in  
- * @param len Length to fill in
- * @param max_allowed is the maximum allowed length for this context
- * @return Pointer to dstpp or NULL in case of error
-*/
-void *smemset_limited(void *dstpp, int c, size_t len, size_t max_allowed);
-
-/**
-* @brief Get the maximum size for the context
- * @param context Usage context
- * @return Maximum allowed size
-*/
+void *smemset_limited(void *dstpp, int c, size_t len, SmemsetLimit limit);
 size_t smemset_get_max_size(SmemsetContext context);
 
-// ==================== Macros for convenience ====================
+// ==================== Context Aliases ====================
+static const SmemsetContext SMEMSET_CTX_ETHERNET = SMEMSET_CONTEXT_ETHERNET;
+static const SmemsetContext SMEMSET_CTX_IP = SMEMSET_CONTEXT_IP;
+static const SmemsetContext SMEMSET_CTX_UDP = SMEMSET_CONTEXT_UDP;
+static const SmemsetContext SMEMSET_CTX_TCP = SMEMSET_CONTEXT_TCP;
+static const SmemsetContext SMEMSET_CTX_SNMP = SMEMSET_CONTEXT_SNMP;
 
-// Fast secure memset for known contexts
-#define SMEMSET_ETH(dst, c, len) smemset_ex(dst, c, len, SMEMSET_CONTEXT_ETHERNET)
-#define SMEMSET_IP(dst, c, len) smemset_ex(dst, c, len, SMEMSET_CONTEXT_IP) 
-#define SMEMSET_SNMP(dst, c, len) smemset_ex(dst, c, len, SMEMSET_CONTEXT_SNMP)
+// ==================== Limit Aliases ====================
+static const SmemsetLimit SMEMSET_MAX_ETH_FRAME = SMEMSET_LIMIT_ETH_FRAME;
+static const SmemsetLimit SMEMSET_MAX_ETH_PAYLOAD = SMEMSET_LIMIT_ETH_PAYLOAD;
+static const SmemsetLimit SMEMSET_MAX_IP_PACKET = SMEMSET_LIMIT_IP_PACKET;
+static const SmemsetLimit SMEMSET_MAX_SNMP_PDU = SMEMSET_LIMIT_SNMP_PDU;
+static const SmemsetLimit SMEMSET_MAX_UDP = SMEMSET_LIMIT_UDP_MAX;
+static const SmemsetLimit SMEMSET_MAX_TCP_MSS = SMEMSET_LIMIT_TCP_MSS;
 
 #ifdef __cplusplus
 }
