@@ -73,7 +73,7 @@ void *smemset(void *dstpp, int c, size_t len)
 #elif defined(__aarch64__)
     __asm__ __volatile__("dmb sy" ::: "memory");
 #else
-    __asm__ __volatile__("" ::: "memory");
+    #error "Memory barrier not implemented for this architecture"
 #endif
 
     if (len >= 8)
@@ -130,7 +130,7 @@ void *smemset(void *dstpp, int c, size_t len)
 #elif defined(__aarch64__)
     __asm__ __volatile__("dmb sy" ::: "memory");
 #else
-    __asm__ __volatile__("" ::: "memory");
+    #error "Memory barrier not implemented for this architecture"
 #endif
 
     return dstpp;
