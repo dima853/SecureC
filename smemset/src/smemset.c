@@ -61,7 +61,7 @@ typedef uint32_t op_t;
 
 void *smemset(void *dstpp, int c, size_t len)
 {
-    if (dstpp == NULL || len == 0)
+    if (dstpp == NULL || len == 0 || len > MAX_ALLOWED_SIZE)
     {
         return dstpp;
     }
