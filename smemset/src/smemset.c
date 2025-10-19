@@ -59,7 +59,6 @@ typedef uint32_t op_t;
 #define OPSIZ 4
 #endif
 
-
 /**
  * @brief Validate memset parameters for specific context
  * @return 0 if valid, error code if invalid
