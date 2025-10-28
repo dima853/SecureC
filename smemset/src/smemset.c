@@ -59,11 +59,75 @@ typedef uint32_t op_t;
 #define OPSIZ 4
 #endif
 
+/**
+ * @brief Validate memset parameters for specific context
+ * @return 0 if valid, error code if invalid
+ */
+int smemset_validate_params(const void *dstpp, size_t len, SmemsetContext context)
+{
+    if (dstpp == NULL) {
+        return -1;   
+    }
+    
+    if (len == 0) {
+        return 0;  
+    }
+
+    size_t max_allowed;
+    switch (context) {
+        case SMEMSET_CONTEXT_ETHERNET:
+            max_allowed = SMEMSET_LIMIT_ETH_FRAME;
+            break;
+        case SMEMSET_CONTEXT_IP:
+            max_allowed = SMEMSET_LIMIT_IP_PACKET;
+            break;
+        case SMEMSET_CONTEXT_SNMP:
+            max_allowed = SMEMSET_LIMIT_SNMP_PDU;
+            break;
+        case SMEMSET_CONTEXT_UDP:
+            max_allowed = SMEMSET_LIMIT_UDP_MAX;
+            break;
+        case SMEMSET_CONTEXT_TCP:
+            max_allowed = SMEMSET_LIMIT_TCP_MSS;
+            break;
+        case SMEMSET_CONTEXT_GENERIC:
+        default:
+            max_allowed = SMEMSET_LIMIT_GENERIC;
+            break;
+    }
+    
+    if (len > max_allowed) {
+        return -2;  // E2BIG
+    }
+    
+    return 0;
+}
+
+/**
+ * @brief Validate memset parameters with custom limit
+ * @return 0 if valid, error code if invalid
+ */
+int smemset_validate_params_limited(const void *dstpp, size_t len, size_t max_allowed)
+{
+    if (dstpp == NULL) {
+        return -1;  
+    }
+    
+    if (len == 0) {
+        return 0;  
+    }
+    
+    if (len > max_allowed) {
+        return -2;  // E2BIG
+    }
+    
+    return 0; 
+}
+
 void *smemset(void *dstpp, int c, size_t len)
 {
-    if (dstpp == NULL || len == 0)
-    {
-        return dstpp;
+    if (smemset_validate_params(dstpp, len, SMEMSET_CONTEXT_GENERIC) != 0) {
+        return NULL;
     }
 
     uintptr_t dstp = (uintptr_t)dstpp;
@@ -73,7 +137,7 @@ void *smemset(void *dstpp, int c, size_t len)
 #elif defined(__aarch64__)
     __asm__ __volatile__("dmb sy" ::: "memory");
 #else
-    __asm__ __volatile__("" ::: "memory");
+    #error "Memory barrier not implemented for this architecture"
 #endif
 
     if (len >= 8)
@@ -94,7 +158,7 @@ void *smemset(void *dstpp, int c, size_t len)
             len -= 1;
         }
 
-        __asm__ __volatile__("" ::: "memory");
+        __asm__ __volatile__("mfence" ::: "memory");
 
         xlen = len / (OPSIZ * 8);
         while (xlen > 0)
@@ -130,8 +194,26 @@ void *smemset(void *dstpp, int c, size_t len)
 #elif defined(__aarch64__)
     __asm__ __volatile__("dmb sy" ::: "memory");
 #else
-    __asm__ __volatile__("" ::: "memory");
+    #error "Memory barrier not implemented for this architecture"
 #endif
 
     return dstpp;
+}
+
+void *smemset_ex(void *dstpp, int c, size_t len, SmemsetContext context)
+{
+    if (smemset_validate_params(dstpp, len, context) != 0) {
+        return NULL;
+    }
+    
+    return smemset(dstpp, c, len);
+}
+
+void *smemset_limited(void *dstpp, int c, size_t len, SmemsetLimit limit)
+{
+    if (smemset_validate_params_limited(dstpp, len, (size_t)limit) != 0) {
+        return NULL;
+    }
+    
+    return smemset(dstpp, c, len);
 }
