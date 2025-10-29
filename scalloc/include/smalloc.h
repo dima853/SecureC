@@ -83,18 +83,33 @@ __attribute__((always_inline)) static inline int get_malloc_debug_flag(void)
     uint64_t start, end;
 
     __asm__ volatile(
-        // read time stamp counter
+        // read time stamp counter (roughly speaking, just a stopwatch)
         /*
         The Time Stamp Counter (TSC) is a 64-bit register present on all x86 processors since the Pentium.【It counts the number of CPU cycles since its reset】
         The instruction RDTSC returns the TSC in EDX:EAX. In x86-64 mode, RDTSC also clears the upper 32 bits of RAX and RDX.
         Its opcode is 0F 31.[1] Pentium competitors such as the Cyrix 6x86 did not always have a TSC and may consider RDTSC an illegal instruction.
         Cyrix included a Time Stamp Counter in their MII.
         */
-        "rdtsc\n\t"            // EAX = младшие 32 бита, EDX = старшие 32
+        "rdtsc\n\t" // EAX = low 32 bits, EDX = high 32
+        //               ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
+        /*
+        EAX and EDX are
+        32-bit registers in the x86 processor architecture, which are used to temporarily store data when executing instructions.
+        EAX is an accumulator register, mainly used for arithmetic operations, while EDX is a data register used to store data in I/O operations or the remainder during division.
+
+        but ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
+
+        RDTSC IGNORES their "specialization"!
+        It just uses EAX/EDX as CONVENIENT CONTAINERS
+
+        Why exactly these registers? Historical reasons:
+        __asm__("rdtsc"); // Returns 64-bits in EDX:EAX - FIXED!
+        */
         "shlq $32, %%rdx\n\t"  // Сдвигаем старшую часть на место
         "orq %%rdx, %%rax\n\t" // Объединяем в RAX
         "movq %%rax, %1\n\t"   // Сохраняем start
-        "rdtsc\n\t"            // Повторяем для end
+
+        "rdtsc\n\t" // Повторяем для end
         "shlq $32, %%rdx\n\t"
         "orq %%rdx, %%rax\n\t"
         "subq %1, %%rax\n\t"    // Разница = end - start
