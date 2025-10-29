@@ -183,7 +183,10 @@ __attribute__((always_inline)) static inline int get_malloc_debug_flag(void)
         "orq %%rdx, %%rax\n\t"  // gluing in rax
         "subq %1, %%rax\n\t"    // subq valid only under -m64 || Difference = end - start (subq = subtract)
         "cmpq $5000, %%rax\n\t" // cmpq valid only under -m64 (cmpq = compare)
-        "seta %0\n\t"           // %0 result = 1 if delta > 5000 or %0 = result = 0 if delta <= 5000 (set byte if above\without notes)
+        // "seta %0\n\t"           // %0 result = 1 if delta > 5000 or %0 = result = 0 if delta <= 5000 (set byte if above\without notes)
+        /*but this shit that seta works with 8-bit registers, but we're trying to write to a 32-bit variable!*/
+        "seta %%al\n\t"       // Writing to 8-bit AL
+        "movzbl %%al, %0\n\t" // Expand to 32 bits in result
         /*
         these are lists of operands and clobbers!
         __asm__ volatile(
