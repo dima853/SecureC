@@ -1,50 +1,55 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <unistd.h>
 
-__attribute__((always_inline)) static inline uint64_t read_tsc(void)
+// 🔴 ТВОЯ ФУНКЦИЯ С ИСКУССТВЕННОЙ ЗАДЕРЖКОЙ
+__attribute__((always_inline)) static inline int get_malloc_debug_flag(void)
 {
-    uint64_t result;
+    int result = 0;
+    uint64_t start;
+
     __asm__ volatile(
         "rdtsc\n\t"
         "shlq $32, %%rdx\n\t"
         "orq %%rdx, %%rax\n\t"
-        "movq %%rax, %0\n\t"
-        : "=r"(result)
+        "movq %%rax, %1\n\t"
+
+        // 🔴 ИСКУССТВЕННАЯ ЗАДЕРЖКА ДЛЯ ТЕСТА
+        "movq $100000000, %%rcx\n\t"
+        "1:\n\t"
+        "decq %%rcx\n\t"
+        "jnz 1b\n\t"
+        // 🔴 КОНЕЦ ЗАДЕРЖКИ
+
+        "rdtsc\n\t"
+        "shlq $32, %%rdx\n\t"
+        "orq %%rdx, %%rax\n\t"
+        "subq %1, %%rax\n\t"
+        "cmpq $1000000, %%rax\n\t"
+        "seta %%al\n\t"
+        "movzbl %%al, %0\n\t"
+        : "=r"(result), "=r"(start)
         :
-        : "%rax", "%rdx", "cc", "memory");
+        : "%rax", "%rdx", "%rcx", "cc", "memory");
+
     return result;
 }
 
 int main()
 {
-    printf("=== ANTIDEBUG TEST ===\n");
+    printf("=== TEST YOUR ANTIDEBUG FUNCTION ===\n");
 
-    uint64_t start = read_tsc();
-    printf("First TSC reading taken: %lu\n", start);
+    // 🔴 ПЕРВЫЙ ВЫЗОВ - без GDB
+    int normal = get_malloc_debug_flag();
+    printf("Normal execution: %d (should be 0)\n", normal);
 
-    printf("=== PUT BREAKPOINT HERE AND WAIT 10 SECONDS! ===\n");
-    printf("Then press 'continue' in GDB\n");
+    // 🔴 ВТОРОЙ ВЫЗОВ - под GDB с брейкпоинтом ВНУТРИ функции
+    printf("Now run under GDB and put breakpoint INSIDE the function!\n");
+    int under_debugger = get_malloc_debug_flag();
+    printf("Under debugger: %d (should be 1)\n", under_debugger);
 
-    // Второе измерение
-    uint64_t end = read_tsc();
-    printf("Second TSC reading taken: %lu\n", end);
-
-    // Вычисляем разницу
-    uint64_t delta = end - start;
-    printf("Delta: %lu ticks\n", delta);
-
-    // Проверяем порог
-    int debugger_detected = (delta > 1000000); // 1 миллион тактов
-    printf("Debugger detected: %d (1 = YES, 0 = NO)\n", debugger_detected);
-
-    if (debugger_detected)
+    if (under_debugger)
     {
-        printf("🚨 DEBUGGER DETECTED! 🚨\n");
-    }
-    else
-    {
-        printf("✅ No debugger detected\n");
+        printf("🚨 YOUR FUNCTION WORKS! IT DETECTED DEBUGGER! 🚨\n");
     }
 
     return 0;
