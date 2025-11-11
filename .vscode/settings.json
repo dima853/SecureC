@@ -3,7 +3,8 @@
         "assert.h": "c",
         "stdlib.h": "c",
         "smemset.h": "c",
-        "core.h": "c"
+        "core.h": "c",
+        "sgoto.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
