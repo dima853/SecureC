@@ -18,8 +18,16 @@ __attribute__((always_inline)) static inline int sgoto_check_place() {
 
     __asm__ volatile(
         "mov %[cleanup_addr], %%rax\n"
-        "mov cleanup_label(%%), %%rdx\n"
-        "mov %[expectation], %%rd"
+        "lea cleanup_label(%%), %%rdx\n"
+        "cmp %%rax, %%rdx\n"
+        "jne integrity_failed\n"
+
+        "mov %[goto_count], %%rcx\n"     
+        "mov %[goto_addrs], %%rsi\n"  
+        "mov %[goto_labels], %%rdi\n"
+
+        "check_goto_loop\n"
+        ""
     )
 
     return result;
