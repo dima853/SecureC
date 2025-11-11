@@ -42,8 +42,9 @@ __attribute__((always_inline)) static inline int sgoto_check_place() {
         "integrity_failed\n"
 
         "mov $0, %[result]\n"
-        "end\n"
+        "end:\n"
         
+        : result 
         )
 
     return result;
