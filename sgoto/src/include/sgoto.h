@@ -26,9 +26,25 @@ __attribute__((always_inline)) static inline int sgoto_check_place() {
         "mov %[goto_addrs], %%rsi\n"  
         "mov %[goto_labels], %%rdi\n"
 
-        "check_goto_loop\n"
-        ""
-    )
+        "check_goto_loop:\n"
+        "mov (%%rax), %%r8\n"
+        "mov (%%rdx), %%r9\n"
+        "cmp %%r8, %%r9\n"
+        "jne integrity_failed\n"
+        "add $8, %%rax\n"
+        "add $8, %%rdx\n" 
+        "dec %%rcx\n"
+        "jnz check_goto_loop\n"
+
+        "mov $1, %[result]\n"
+        "jmp end\n"
+
+        "integrity_failed\n"
+
+        "mov $0, %[result]\n"
+        "end\n"
+        
+        )
 
     return result;
 }
