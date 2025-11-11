@@ -30,6 +30,9 @@ __attribute__((always_inline)) static inline int sgoto_check_place() {
         "calc_curr_hash:\n"
         "movb (%%rdx), %%al\n"
         "xorb %%al, %%bl\n"
+        "rol $3, %%ebx\n"
+        "inc %%rdi\n"
+        "cmp %%rsi, %%rdi\n"
     )
 
     return result;
