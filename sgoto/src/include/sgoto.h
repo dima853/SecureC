@@ -17,22 +17,9 @@ __attribute__((always_inline)) static inline int sgoto_check_place() {
     int result = 0;
 
     __asm__ volatile(
-        "push %%rbx\n"
-        "push %%rcx\n"
-        "push %%rdx\n"
-        "push %%rsi\n"
-        "push %%rdi\n"
-
-        "push %[start], %%rdi\n"
-        "push %[end], %%rsi\n"
-        "xor %%rbx, %%rbx\n" 
-
-        "calc_curr_hash:\n"
-        "movb (%%rdx), %%al\n"
-        "xorb %%al, %%bl\n"
-        "rol $3, %%ebx\n"
-        "inc %%rdi\n"
-        "cmp %%rsi, %%rdi\n"
+        "mov %[cleanup_addr], %%rax\n"
+        "mov cleanup_label(%%), %%rdx\n"
+        "mov %[expectation], %%rd"
     )
 
     return result;
