@@ -22,7 +22,7 @@ extern HashGenerator global_hash_gen;
 // Returns: 1 if integrity verified, 0 if integrity check failed
 __attribute__((always_inline)) static inline int sgoto_check_place(sgoto_t *sg)
 {
-    int result = 0; // Initialize result to 0 (failure)
+    int result = 0; 
 
     __asm__ volatile(
         "jmp after_labels\n"
