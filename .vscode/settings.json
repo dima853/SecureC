@@ -4,7 +4,8 @@
         "stdlib.h": "c",
         "smemset.h": "c",
         "core.h": "c",
-        "sgoto.h": "c"
+        "sgoto.h": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

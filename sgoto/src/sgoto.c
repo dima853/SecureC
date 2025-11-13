@@ -1,4 +1,5 @@
 #include "/mnt/c/Users/dmako/safe_repo/sgoto/src/include/sgoto.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 // Define global hash generator
@@ -18,48 +19,63 @@ sgoto_t *sg_init(void *cleanup_addr)
     return sg;
 }
 
-// Function to get current addresses of all verification labels
+// ЕДИНАЯ функция для получения адресов меток
 void **sgoto_get_label_addresses(void)
 {
-    static void *labels[16];
-
-// Объявляем все 16 обычных меток C
+// Объявляем метки как C метки в этой функции
 cleanup_label:
-goto_label_1:
-goto_label_2:
-goto_label_3:
-goto_label_4:
-goto_label_5:
-goto_label_6:
-goto_label_7:
-goto_label_8:
-goto_label_9:
-goto_label_10:
-goto_label_11:
-goto_label_12:
-goto_label_13:
-goto_label_14:
-goto_label_15:
-goto_label_16:
+    __asm__ volatile("nop");
 
-    // Получаем адреса всех меток
+goto_label_1:
+    __asm__ volatile("nop");
+
+goto_label_2:
+    __asm__ volatile("nop");
+
+goto_label_3:
+    __asm__ volatile("nop");
+
+    static void *labels[16];
     labels[0] = &&cleanup_label;
     labels[1] = &&goto_label_1;
     labels[2] = &&goto_label_2;
     labels[3] = &&goto_label_3;
-    labels[4] = &&goto_label_4;
-    labels[5] = &&goto_label_5;
-    labels[6] = &&goto_label_6;
-    labels[7] = &&goto_label_7;
-    labels[8] = &&goto_label_8;
-    labels[9] = &&goto_label_9;
-    labels[10] = &&goto_label_10;
-    labels[11] = &&goto_label_11;
-    labels[12] = &&goto_label_12;
-    labels[13] = &&goto_label_13;
-    labels[14] = &&goto_label_14;
-    labels[15] = &&goto_label_15;
-    // Последний элемент массива (16-й) не используется, так как cleanup_label занимает 0-ю позицию
 
     return labels;
+}
+
+// Secure GOTO integrity verification function
+int sgoto_check_place(sgoto_t *sg)
+{
+    int result = 0;
+    void **label_addrs = sgoto_get_label_addresses();
+
+    printf("[DEBUG] === START ASSEMBLER EXECUTION ===\n");
+    printf("[DEBUG] Input: cleanup_addr=%p, actual_cleanup=%p\n", sg->core_addr, label_addrs[0]);
+    printf("[DEBUG] Input: goto_count=%d\n", sg->child_count);
+    printf("[DEBUG] Initial result=%d\n", result);
+
+    __asm__ volatile(
+        // Cleanup address check
+        "mov %[cleanup_addr], %%rax\n"
+        "mov %[actual_cleanup], %%rdx\n"
+        "cmp %%rax, %%rdx\n"
+        "jne integrity_failed\n"
+
+        "mov $1, %[result]\n"
+        "jmp end\n"
+
+        "integrity_failed:\n"
+        "mov $0, %[result]\n"
+
+        "end:\n"
+        : [result] "=r"(result)
+        : [cleanup_addr] "r"(sg->core_addr),
+          [actual_cleanup] "r"(label_addrs[0])
+        : "rax", "rdx", "cc");
+
+    printf("[DEBUG] === END ASSEMBLER EXECUTION ===\n");
+    printf("[DEBUG] Final result=%d\n", result);
+
+    return result;
 }
