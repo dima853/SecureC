@@ -55,7 +55,7 @@ static inline EHashPtr make_ehash_ptr(void *ptr, uint16_t hash)
 
 static inline void *ehash_get_ptr(EHashPtr p)
 {
-    return (void *)p.ptr;
+    return (void *)(uintptr_t)p.ptr;
 }
 
 static inline bool ehash_full_equal(EHashPtr a, EHashPtr b)

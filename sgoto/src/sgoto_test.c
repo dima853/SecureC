@@ -5,11 +5,14 @@ int main()
 {
     printf("Testing secure goto...\n");
 
+    // Initialize
     sgoto_init(0x1234);
 
-    // Сначала получим адрес cleanup метки
-    sgoto_t *sg = sg_init(NULL); // Временно NULL
+    // Get cleanup address from labels
+    void **labels = sgoto_get_label_addresses();
+    sgoto_t *sg = sg_init(labels[0]); // Use actual cleanup label address
 
+    // Test integrity check
     int result = sgoto_check_place(sg);
     printf("Integrity check result: %d\n", result);
 
