@@ -76,3 +76,20 @@ int sgoto_check_place(sgoto_t *sg)
     return result;
 
 }
+
+__attribute__((naked)) 
+void sgoto_raw(sgoto_t *sg, uint8_t idx) {
+    __asm__ volatile(
+        "push %%rbp\n"           ; ДВОЙНЫЕ %%
+        "mov %%rsp, %%rbp\n"     ; ДВОЙНЫЕ %%
+        
+        ; Проверка целостности
+        "mov %%rdi, %%rbx\n"     ; %rbx = sg структура
+        "call sgoto_check_place\n"
+        "test %%eax, %%eax\n"
+        "jz sgoto_fail\n"
+        
+        
+    );
+}
+
