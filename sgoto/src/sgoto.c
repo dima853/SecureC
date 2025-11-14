@@ -92,7 +92,11 @@ void sgoto_raw(sgoto_t *sg, uint8_t idx) {
         "mov %%sil, %%al\n"
         "cmp 0xB0(%%rbx), %%al\n"
         "jae sgoto_failed\n"
+
+        "movzx %%al,%%rax\n"
+        "mov 0x8(%%rbx, %%rax, 8), %%rax\n"
     );
 }
+
 
 
