@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Define global hash generator
 HashGenerator global_hash_gen;
 
 void sgoto_init(uint64_t seed)
@@ -19,10 +18,8 @@ sgoto_t *sg_init(void *cleanup_addr)
     return sg;
 }
 
-// ЕДИНАЯ функция для получения адресов меток
 void **sgoto_get_label_addresses(void)
 {
-// Объявляем метки как C метки в этой функции
 cleanup_label:
     __asm__ volatile("nop");
 
@@ -44,7 +41,6 @@ goto_label_3:
     return labels;
 }
 
-// Secure GOTO integrity verification function
 int sgoto_check_place(sgoto_t *sg)
 {
     int result = 0;
@@ -78,4 +74,5 @@ int sgoto_check_place(sgoto_t *sg)
     printf("[DEBUG] Final result=%d\n", result);
 
     return result;
+
 }
