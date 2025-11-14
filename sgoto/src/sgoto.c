@@ -102,7 +102,3 @@ void sgoto_raw(sgoto_t *sg, uint8_t idx) {
         "jmp *%%rax\n"
     );
 }
-
-
-
-
