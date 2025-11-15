@@ -1,10 +1,7 @@
 #pragma once
 
 #include "/mnt/c/Users/dmako/safe_repo/sgoto/third-party/ephemeral-hash-cas/src/core/include/core.h"
-#include <stdint.h>
-#include <stdlib.h>
 
-// Secure GOTO structure definition
 typedef struct
 {
     uint16_t curr_hash;
@@ -14,10 +11,10 @@ typedef struct
     uint8_t child_count;
 } sgoto_t;
 
-// External global hash generator
 extern HashGenerator global_hash_gen;
 
-// Function declarations
 void sgoto_init(uint64_t seed);
 sgoto_t *sg_init(void *cleanup_addr);
-int sgoto_check_place(sgoto_t *sg);
+void **sgoto_get_label_addresses(void);
+int sgoto_check_place(sgoto_t *sg, void **current_labels);
+void sgoto_raw(sgoto_t *sg, uint8_t idx);
