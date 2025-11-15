@@ -23,22 +23,16 @@ void **sgoto_get_label_addresses(void)
 {
     static void *labels[16];
 
-    labels[0] = (void *)0x1;
-    labels[1] = (void *)0x2;
-    labels[2] = (void *)0x3;
-    labels[3] = (void *)0x4;
-    labels[4] = (void *)0x5;
-    labels[5] = (void *)0x6;
-    labels[6] = (void *)0x7;
-    labels[7] = (void *)0x8;
-    labels[8] = (void *)0x9;
-    labels[9] = (void *)0xA;
-    labels[10] = (void *)0xB;
-    labels[11] = (void *)0xC;
-    labels[12] = (void *)0xD;
-    labels[13] = (void *)0xE;
-    labels[14] = (void *)0xF;
-    labels[15] = (void *)0x10;
+    // Use actual function addresses instead of fake ones
+    labels[0] = (void *)cleanup_label;
+    labels[1] = (void *)goto_label_1;
+    labels[2] = (void *)goto_label_2;
+    labels[3] = (void *)goto_label_3;
+    // Initialize the rest to cleanup_label for safety
+    for (int i = 4; i < 16; i++)
+    {
+        labels[i] = (void *)cleanup_label;
+    }
 
     return labels;
 }

@@ -13,6 +13,11 @@ typedef struct
 
 extern HashGenerator global_hash_gen;
 
+void cleanup_label(void);
+void goto_label_1(void);
+void goto_label_2(void);
+void goto_label_3(void);
+
 void sgoto_init(uint64_t seed);
 sgoto_t *sg_init(void *cleanup_addr);
 void **sgoto_get_label_addresses(void);
