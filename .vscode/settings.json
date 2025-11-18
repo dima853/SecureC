@@ -6,7 +6,8 @@
         "core.h": "c",
         "sgoto.h": "c",
         "stdio.h": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "cerrno": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
