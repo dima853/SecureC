@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 static inline int has_percent_asm_x64(const char *str) {
     int result = 0;
 
@@ -41,8 +43,6 @@ static inline int has_percent_asm_x64(const char *str) {
     return result;
 }
 
-#include <stddef.h>
-
 static inline int has_percent_asm_arm64(const char *str) {
     int result = 0;
 
@@ -54,7 +54,7 @@ static inline int has_percent_asm_arm64(const char *str) {
         // section 1
         "1:\n\t"
         /*
-        ldrb = Load Register Byte (загрузить байт)
+        ldrb = Load Register Byte 
         [] like *ptr (looking at the content) 
         
         w2 = 32-bit register (lower half of x2)
@@ -71,7 +71,7 @@ static inline int has_percent_asm_arm64(const char *str) {
         */
         "cmp w2, w1\n\t"              // compare \\ like if (current_char == '%')
         /*
-        b.eq = Branch if Equal (перейти если равно)
+        b.eq = Branch if Equal 
         Condition codes from cmp instruction:
         - eq (equal) = Z flag set (1)
         - ne (not equal) = Z flag clear (0)
@@ -84,7 +84,7 @@ static inline int has_percent_asm_arm64(const char *str) {
         */
         "add %1, %1, #1\n\t"          // str++ \\ pointer increment
         /*
-        b = Branch (безусловный переход)
+        b = Branch 
         1b = backward to label 1: (искать метку 1: перед текущей позицией)
         */
         "b 1b\n\t"                    // like continue \\ goto loop_start
@@ -99,13 +99,13 @@ static inline int has_percent_asm_arm64(const char *str) {
         */
         "mov %0, w0\n\t"              // store result
         /*
-        OUTPUT operands (выходные операнды)
+        OUTPUT operands 
         "=r" = write-only, any register
         (result) = C variable to store the result
         */
         : "=r" (result)
         /*
-        INPUT operands (входные операнды)
+        INPUT operands 
         "r" = any register
         (str) = C variable containing the string pointer
         ARM calling convention: first argument in x0
@@ -113,7 +113,7 @@ static inline int has_percent_asm_arm64(const char *str) {
         */
         : "r" (str)
         /*
-        CLOBBER list (испорченные регистры)
+        CLOBBER list 
         "w0", "w1", "w2" = 32-bit registers we modify
         "cc" = condition codes (flags) are modified
         "memory" = memory may be modified
